@@ -1,8 +1,6 @@
-import account
 import twitter
-import string
-import time
-import random
+import account
+import string, time, random
 import multiprocessing
 
 '''Initialization of both twitter global access and bot's account.'''
@@ -11,43 +9,50 @@ bot = account.initialize()
 
 '''Default variables for global use on the entire bot app.'''
 MAXIMUM_PAGE = 100
-BOT_ACCOUNT = "daehode"
-SLEEP_NEW_TWEET = 60 * 60 * 5   # 60 seconds times 60 minutes times N hours of sleep
+SLEEP_FOLLOWING = 60 * 60               # 60 seconds times 60 minutes
+SLEEP_UNFOLLOWING = 60 * 60 * 24 * 7    # Whole week of sleep
+SLEEP_NEW_TWEET = 60 * 60 * 1           # 60 seconds times 60 minutes times N hours of sleep
 
-following = 0   #Users following per day. Shouldn't pass the 500
+following = 0   # Users following per day. Shouldn't pass 500
 followers_limit = 0
 
 
 '''Returns the User Object with the screen name of the authenticated account.'''
 def get_bot_user():
-  return bot.GetUser(BOT_ACCOUNT)
+  return bot.GetUser(account.GetUser())
 
 
 '''Function to follow those who have recently talked about an specific topic or word.'''
-def follow_people_by_topic():
-  acum = 0
-  global following
-  pagination_index = 1
-  accounts_per_page = 20
-  topic_to_search = "tec"
-  while pagination_index <= 5:
-    chicos_tec = twitter.GetSearch(topic_to_search, None, None, accounts_per_page, pagination_index, "es", "true", True)
-    while acum < len(chicos_tec):
-      user = chicos_tec[acum].user 
-      if user.followers_count < 1000:   # Conditions as filter to follow new people
-        #bot.CreateFriendship(user.screen_name)
-        print "Started following: " + user.screen_name # + " from " + user.time_zone
-      acum += 1
-    following += acum
-    acum = 0
-    pagination_index += 1
-  print following
-  #time.sleep(60)    # 86400 for an entire day
+'''Limit of 150 requests per hour'''
+def follow_people_by_topic(topic):
+  while True:
+    global following
+    acum, pagination_index, accounts_per_page = 0, 1, 5
+    topic_to_search = topic.pop()      # Pop last element for searching
+    topic.insert(0, topic_to_search)   # Insert immediatley to consider for next searches
+    while pagination_index <= 5:
+      print 'Searching users in page ' + str(pagination_index) + '...'
+      search = twitter.GetSearch(topic_to_search, None, None, 
+                                 accounts_per_page, pagination_index, "es", "true", True)
+      while acum < len(search):
+        user = search[acum].user 
+        if user.followers_count < 1000:   # Conditions as filter to follow new people
+          bot.CreateFriendship(user.screen_name)
+          print "Started following: " + user.screen_name # + " from " + user.time_zone
+          time.sleep(3)
+        acum += 1
+      following += acum
+      #print following            # Verification of shared variable among processes
+      acum = 0
+      pagination_index += 1
+    print 'Started following ' + str(following) + ' users'
+    time.sleep(SLEEP_FOLLOWING)
 
 
 '''Function to unfollow people who haven't returned the follow yet.'''
 def unfollow_people():
   while True:
+    time.sleep(500)
     page, unfollowed = 0, 0
     users_bot_follows = bot.GetFriends()        # To determine the number of iterations through folowers' pages
     following_limit = len(users_bot_follows)/MAXIMUM_PAGE   # Aproximatley 100 following users per page
@@ -58,16 +63,18 @@ def unfollow_people():
       page = 1
       for user in users_bot_follows:
         if not following_bot(user):
-          #bot.DestroyFriendship(user.screen_name)
+          bot.DestroyFriendship(user.screen_name)
           print "Unfollowing: " + user.screen_name
           unfollowed += 1
+          time.sleep(3)     # Patch to keep requests under 150 per hour
       page += 1
-    print '-------------------'
+    print '-' * 10
     print 'UNFOLLOWING Process:\t Finished'
-    print 'People Unfollowed:\t ' + unfollowed
-    print '-------------------'
-    time.sleep(3600)
+    print 'People Unfollowed:\t ' + str(unfollowed)
+    print '-' * 10
 
+
+'''Function returning true if the user received as parameter is followin the bot. Otherwise, will return false.'''
 def following_bot(user):
   page = 0
   while page <= followers_limit:
@@ -81,32 +88,33 @@ def following_bot(user):
 '''Function to tweet random phrases from an specific file.'''
 def tweet_from_file():
   while True:
-    f = open('tweets.txt', 'r')   # Open file saving tweets in read mode
-    tweets = f.readlines()        # Save all lines in a list as a possible tweet
-    f.close()                     # Close file to avoid any further issue
+    f = open('tweets.txt', 'r')     # Open file saving tweets in read mode
+    tweets = f.readlines()          # Save all lines in a list as a possible tweet
+    f.close()                       # Close file to avoid any further issue
 
     index = random.randint(0, len(tweets)-1)
     #bot.PostUpdates(tweets[index])
-    print '-------------------'
+    print '-' * 10
     print 'TWEETING Process:\t Finished'
     print 'Tweet was:\t\t ' + tweets[index].split('\n')[0]
-    print '-------------------'
+    print '-' * 10
     del tweets[index]
 
-    f = open('tweets.txt', 'w')   # Reopen file to write remaining tweets
+    f = open('tweets.txt', 'w')     # Reopen file to write remaining tweets
     f.writelines(tweets)
     f.close()
-    time.sleep(SLEEP_NEW_TWEET)
+    time.sleep(SLEEP_NEW_TWEET)     # Sleeps certain time until the next tweet
 
 
 '''Bot flow'''
-# Should use threads for syncronizathion
-#follow_people_by_topic()
+# Should use threads for syncronizathion and independent tasks
+#follow_people_by_topic("tec")
 #unfollow_people()
 #tweet_from_file()
 
 #unfollow.start()
 #tweet_from_f.start()
-multiprocessing.Process(target=tweet_from_file).start()
+multiprocessing.Process(target=follow_people_by_topic, args=(['educacion monterrey', 'tec'],)).start()
 multiprocessing.Process(target=unfollow_people).start()
+multiprocessing.Process(target=tweet_from_file).start()
 

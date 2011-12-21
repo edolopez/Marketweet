@@ -5,6 +5,11 @@ import datetime
 import simplejson
 import twitter
 
+USERNAME = "daehode"
+
+def GetUser():
+  return USERNAME
+
 def initialize():
     #edohead:
     api = twitter.Api(consumer_key='KHahmK2ghrLmobPvQbu7AQ', 
