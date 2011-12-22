@@ -27,7 +27,7 @@ def get_bot_user():
 def follow_people_by_topic(topic):
   while True:
     global following
-    acum, pagination_index, accounts_per_page = 0, 1, 5
+    acum, pagination_index, accounts_per_page = 0, 1, 20
     topic_to_search = topic.pop()      # Pop last element for searching
     topic.insert(0, topic_to_search)   # Insert immediatley to consider for next searches
     while pagination_index <= 5:
@@ -37,22 +37,24 @@ def follow_people_by_topic(topic):
       while acum < len(search):
         user = search[acum].user 
         if user.followers_count < 1000:   # Conditions as filter to follow new people
-          bot.CreateFriendship(user.screen_name)
           print "Started following: " + user.screen_name # + " from " + user.time_zone
+          bot.CreateFriendship(user.screen_name)
           time.sleep(3)
         acum += 1
       following += acum
-      #print following            # Verification of shared variable among processes
       acum = 0
       pagination_index += 1
-    print 'Started following ' + str(following) + ' users'
-    time.sleep(SLEEP_FOLLOWING)
+    print 'Following ' + str(following) + ' users'
+    if (following == 500):  # Users following per day. Shouldn't pass 500
+      following = 0   
+      time.sleep(86400)     # Actual time - Initial time
+    time.sleep(3600)
 
 
 '''Function to unfollow people who haven't returned the follow yet.'''
 def unfollow_people():
   while True:
-    time.sleep(500)
+    time.sleep(3600)
     page, unfollowed = 0, 0
     users_bot_follows = bot.GetFriends()        # To determine the number of iterations through folowers' pages
     following_limit = len(users_bot_follows)/MAXIMUM_PAGE   # Aproximatley 100 following users per page
@@ -63,8 +65,8 @@ def unfollow_people():
       page = 1
       for user in users_bot_follows:
         if not following_bot(user):
-          bot.DestroyFriendship(user.screen_name)
           print "Unfollowing: " + user.screen_name
+          bot.DestroyFriendship(user.screen_name)
           unfollowed += 1
           time.sleep(3)     # Patch to keep requests under 150 per hour
       page += 1
@@ -92,13 +94,16 @@ def tweet_from_file():
     tweets = f.readlines()          # Save all lines in a list as a possible tweet
     f.close()                       # Close file to avoid any further issue
 
-    index = random.randint(0, len(tweets)-1)
-    #bot.PostUpdates(tweets[index])
-    print '-' * 10
-    print 'TWEETING Process:\t Finished'
-    print 'Tweet was:\t\t ' + tweets[index].split('\n')[0]
-    print '-' * 10
-    del tweets[index]
+    if (len(tweets) <= 0):          # In case no more lines in file
+      print 'There are no tweets to tweet on the file'
+    else:
+      index = random.randint(0, len(tweets)-1)
+      #bot.PostUpdates(tweets[index])
+      print '-' * 10
+      print 'TWEETING Process:\t Finished'
+      print 'Tweet was:\t\t ' + tweets[index].split('\n')[0]
+      print '-' * 10
+      del tweets[index]
 
     f = open('tweets.txt', 'w')     # Reopen file to write remaining tweets
     f.writelines(tweets)
@@ -114,7 +119,7 @@ def tweet_from_file():
 
 #unfollow.start()
 #tweet_from_f.start()
-multiprocessing.Process(target=follow_people_by_topic, args=(['educacion monterrey', 'tec'],)).start()
-multiprocessing.Process(target=unfollow_people).start()
+#multiprocessing.Process(target=follow_people_by_topic, args=(['monterrey', 'paz'],)).start()
+#multiprocessing.Process(target=unfollow_people).start()
 multiprocessing.Process(target=tweet_from_file).start()
 
