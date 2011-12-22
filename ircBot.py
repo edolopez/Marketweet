@@ -9,7 +9,7 @@ bot = account.initialize()
 
 '''Default variables for global use on the entire bot app.'''
 MAXIMUM_PAGE = 100
-SLEEP_FOLLOWING = 60 * 60               # 60 seconds times 60 minutes
+SLEEP_FOLLOWING = 60 * 60 * 1           # 60 seconds times 60 minutes times N hours of sleep
 SLEEP_UNFOLLOWING = 60 * 60 * 24 * 7    # Whole week of sleep
 SLEEP_NEW_TWEET = 60 * 60 * 1           # 60 seconds times 60 minutes times N hours of sleep
 
@@ -39,41 +39,43 @@ def follow_people_by_topic(topic):
         if user.followers_count < 1000:   # Conditions as filter to follow new people
           print "Started following: " + user.screen_name # + " from " + user.time_zone
           bot.CreateFriendship(user.screen_name)
-          time.sleep(3)
+          time.sleep(3)     # Patch to keep requests under 150 per hour
         acum += 1
       following += acum
       acum = 0
       pagination_index += 1
     print 'Following ' + str(following) + ' users'
-    if (following == 500):  # Users following per day. Shouldn't pass 500
-      following = 0   
-      time.sleep(86400)     # Actual time - Initial time
-    time.sleep(3600)
+    if (following == 500 or following == 1000 or following == 1500):  # Users following per day. Shouldn't pass 500 
+      time.sleep(86401)     # Sleep one day. Limit has been reached
+    elif (following == 2000)
+      # Need to unfollow people, in order to follow more. 
+      time.sleep(86400)             #SLEEP_UNFOLLOWING
+      unfollow_people()
+      following = 0
+    time.sleep(SLEEP_FOLLOWING)
 
 
 '''Function to unfollow people who haven't returned the follow yet.'''
 def unfollow_people():
-  while True:
-    time.sleep(3600)
-    page, unfollowed = 0, 0
-    users_bot_follows = bot.GetFriends()        # To determine the number of iterations through folowers' pages
-    following_limit = len(users_bot_follows)/MAXIMUM_PAGE   # Aproximatley 100 following users per page
-    followers_limit = get_bot_user().GetFollowersCount()/MAXIMUM_PAGE
-    print 'UNFOLLOWING Process:\t Started'
-    
-    while page <= following_limit:
-      page = 1
-      for user in users_bot_follows:
-        if not following_bot(user):
-          print "Unfollowing: " + user.screen_name
-          bot.DestroyFriendship(user.screen_name)
-          unfollowed += 1
-          time.sleep(3)     # Patch to keep requests under 150 per hour
-      page += 1
-    print '-' * 10
-    print 'UNFOLLOWING Process:\t Finished'
-    print 'People Unfollowed:\t ' + str(unfollowed)
-    print '-' * 10
+  page, unfollowed = 0, 0
+  users_bot_follows = bot.GetFriends()        # To determine the number of iterations through folowers' pages
+  following_limit = len(users_bot_follows)/MAXIMUM_PAGE   # Aproximatley 100 following users per page
+  followers_limit = get_bot_user().GetFollowersCount()/MAXIMUM_PAGE
+  print 'UNFOLLOWING Process:\t Started'
+  
+  while page <= following_limit:
+    page = 1
+    for user in users_bot_follows:
+      if not following_bot(user):
+        print "Unfollowing: " + user.screen_name
+        bot.DestroyFriendship(user.screen_name)
+        unfollowed += 1
+        time.sleep(3)     # Patch to keep requests under 150 per hour
+    page += 1
+  print '-' * 10
+  print 'UNFOLLOWING Process:\t Finished'
+  print 'People Unfollowed:\t ' + str(unfollowed)
+  print '-' * 10
 
 
 '''Function returning true if the user received as parameter is followin the bot. Otherwise, will return false.'''
@@ -117,9 +119,8 @@ def tweet_from_file():
 #unfollow_people()
 #tweet_from_file()
 
-#unfollow.start()
-#tweet_from_f.start()
-#multiprocessing.Process(target=follow_people_by_topic, args=(['monterrey', 'paz'],)).start()
+#tweet_from_file.start()
+multiprocessing.Process(target=follow_people_by_topic, args=(['monterrey', 'paz'],)).start()
 #multiprocessing.Process(target=unfollow_people).start()
 multiprocessing.Process(target=tweet_from_file).start()
 
