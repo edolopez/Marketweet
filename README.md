@@ -1,6 +1,6 @@
 Marketweet
 ====================
-Marketweet is a bot for twitter coded in python, totally for marketing puposes. It is relying on the twitter module developed by the Python-Twitter Developers group http://code.google.com/p/python-twitter/ 
+Marketweet is a bot for twitter coded in python, totally for marketing puposes. It is relying on the twitter module developed by the [Python-Twitter Developers group](http://code.google.com/p/python-twitter/) 
 
 With Marketweet you can:
 
@@ -8,6 +8,8 @@ With Marketweet you can:
 * Follow users based on specific keywords.
 * Unfollow those users who haven't returned the follow in certain time.
 * To keep following those users who haven't returned the follow, considered as potential for your timeline and credibility. 
+
+It is developed to be used on Linux OS. 
 
 Dependencies
 ---------------------
@@ -17,9 +19,7 @@ To start using Marketweet you need to install some dependencies:
 * [Httplib2:](http://code.google.com/p/httplib2/) Can be installed through terminal
 * [OAuth2:](http://github.com/simplegeo/python-oauth2) Can be added into the Marketweet project dragging and dropping the main folder oauth2.
 
-The project is relying on the Twitter Module developet by the Python-Twitter Developers group: http://code.google.com/p/python-twitter/
-
-You can directly download the entire project, or use the essential files posted here with the actual Marketweet project. Some lines have been adapted to Marketweet's functionality, so I suggest you to use the twitter module posted here. In case you want the newest version of the Twitter Module, please adapt it as discussed in the **Setup** section **twitter.py** header. 
+For the __Twitter Module__ developed by the Python-Twitter Developers group, you can directly download the entire project, or use the essential files posted here with the actual Marketweet project. Some lines have been adapted to Marketweet's functionality, so I suggest you to use the twitter module posted here. In case you want the newest version of the Twitter Module, please adapt it as discussed in the **Setup** section **twitter.py** header. 
 
 For an explicit explanation of what the Twitter module does, you can see the documentation [here](http://static.unto.net/python-twitter/0.5/doc/twitter.html).
 
@@ -40,7 +40,7 @@ First of all, the account.py need to have all credentials and information about 
                       access_token_secret='access_token_secret', 
                       debugHTTP=False)
                                         
-If you don't have the credentials for your account, you can easily set up them here https://dev.twitter.com/ signing in with your corresponding account.
+If you don't have the credentials for your account, you can easily set up them [here](https://dev.twitter.com/), signing in with your corresponding account.
 
 ### ircBot.py (optional)
 
