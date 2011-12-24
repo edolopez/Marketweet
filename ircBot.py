@@ -41,7 +41,7 @@ def follow_people_by_topic():
         if user.followers_count < 1000:   # Conditions as filter to follow new people
           print "Started following: " + str(user.screen_name) # + " from " + user.time_zone
           bot.CreateFriendship(user.screen_name)
-          time.sleep(3)     # Patch to keep requests under 150 per hour
+          time.sleep(24)     # Patch to keep requests under 150 per hour (3600/150)
         acum += 1
       following += acum
       acum = 0
@@ -51,7 +51,7 @@ def follow_people_by_topic():
       print 'Sleeping for 24 hours. Limit of following 500 per day has been reached' 
       print str(time.asctime(time.localtime()))
       time.sleep(7200)     # Sleep one day. Limit has been reached
-    elif (following >= 400):
+    elif (following >= 100):
       print 'Waiting until people start to return the follow in order to unfollow' 
       print str(time.asctime(time.localtime()))
       time.sleep(1000)               #SLEEP_UNFOLLOWING
@@ -88,7 +88,7 @@ def unfollow_people():
         print "Unfollowing: " + str(user.screen_name)
         bot.DestroyFriendship(user.screen_name)
         unfollowed += 1
-        time.sleep(3)     # Patch to keep requests under 150 per hour
+        time.sleep(24)     # Patch to keep requests under 150 per hour
     page += 1
   print '-' * 10
   print 'UNFOLLOWING Process:\t Finished'
