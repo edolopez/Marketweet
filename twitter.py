@@ -3668,10 +3668,14 @@ class Api(object):
       self._CheckForTwitterError(data)
     except ValueError:
       if "<title>Twitter / Over capacity</title>" in json:
-        raise TwitterError("Capacity Error")
+        #raise TwitterError("Capacity Error")
+        print TwitterError("Capacity Error")
       if "<title>Twitter / Error</title>" in json:
-        raise TwitterError("Technical Error")
-      raise TwitterError("json decoding")
+        #raise TwitterError("Technical Error")
+        print TwitterError("Technical Error")
+      #raise TwitterError("json decoding")
+      print TwitterError("json decoding")
+      data = {}
 
     return data
 
@@ -3688,7 +3692,8 @@ class Api(object):
     # Twitter errors are relatively unlikely, so it is faster
     # to check first, rather than try and catch the exception
     if 'error' in data:
-      raise TwitterError(data['error'])
+      #raise TwitterError(data['error'])
+      print TwitterError(data['error'])
 
   def _FetchUrl(self,
                 url,
