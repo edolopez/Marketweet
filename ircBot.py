@@ -38,10 +38,10 @@ def follow_people_by_topic():
                                  accounts_per_page, pagination_index, "es", "true", True)
       while acum < len(search):
         user = search[acum].user 
-        if user.followers_count < 1000:   # Conditions as filter to follow new people
+        if user.followers_count < 1000:     # Conditions as filter to follow new people
           print "Started following: " + str(user.screen_name) # + " from " + user.time_zone
           bot.CreateFriendship(user.screen_name)
-          time.sleep(24)     # Patch to keep requests under 150 per hour (3600/150)
+        time.sleep(24)     # Patch to keep requests under 150 per hour (3600/150)
         acum += 1
       following += acum
       acum = 0
@@ -72,7 +72,7 @@ def topic():
   f.writelines(topics)
   f.close()  
   return topic_line.split('\n')[0]  # Remove the jump line at the end of the line
-
+  
 
 '''Function to unfollow people who haven't returned the follow yet.'''
 def unfollow_people():
@@ -80,15 +80,16 @@ def unfollow_people():
   page, unfollowed = 0, 0
   following_limit = get_bot_user().GetFriendsCount()/MAXIMUM_PAGE   # Aproximatley 100 following users per page
   followers_limit = get_bot_user().GetFollowersCount()/MAXIMUM_PAGE
-  
+  master_users = users()        # List of all users should follow no matter what
+
   while page <= following_limit:
     users_bot_follows = bot.GetFriends()        # To determine the number of iterations through folowers' pages
     for user in users_bot_follows:
-      if not following_bot(user):
+      if not following_bot(user) and str(user.screen_name) not in master_users:
         print "Unfollowing: " + str(user.screen_name)
         bot.DestroyFriendship(user.screen_name)
         unfollowed += 1
-        time.sleep(24)     # Patch to keep requests under 150 per hour
+      time.sleep(24)     # Patch to keep requests under 150 per hour
     page += 1
   print '-' * 10
   print 'UNFOLLOWING Process:\t Finished'
@@ -105,6 +106,18 @@ def following_bot(user):
     page += 1
   return False
 
+'''Returns a list of users that should be followed even if the don't follow back'''
+def users():
+  users_list = []
+  f = open('users.txt', 'r')       # Open files to make them an array
+  master_users = f.readlines()
+  f.close()
+  
+  for user in master_users:        # Removes the '\n' from file for each user
+    users_list.append(user.split('\n')[0])
+  
+  return users_list
+  
 
 '''Function to tweet random phrases from an specific file.'''
 def tweet_from_file():
@@ -135,12 +148,12 @@ def tweet_from_file():
 '''Bot flow'''
 # Should use threads for syncronizathion and independent tasks
 #follow_people_by_topic("tec")
-#unfollow_people()
+unfollow_people()
 #tweet_from_file()
 
 #tweet_from_file.start()
 #multiprocessing.Process(target=follow_people_by_topic, args=(['mexico', 'rayados'],)).start()
-multiprocessing.Process(target=follow_people_by_topic).start()
+#multiprocessing.Process(target=follow_people_by_topic).start()
 #multiprocessing.Process(target=unfollow_people).start()
 #multiprocessing.Process(target=tweet_from_file).start()
 
