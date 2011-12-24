@@ -53,7 +53,11 @@ Next, you can modify if you want the ircBot.py file. Everything can be modified,
     SLEEP_NEW_TWEET = 60 * 60 * 1 
     ONE_DAY = 86400
     
-These variables are used in all places where the time.sleep(CONSTANT) is used to sleep processes and keep the account as another user in the twitter world. It is needed because:
+These variables are used in all places where the 
+
+    time.sleep(CONSTANT) 
+    
+is used to sleep processes and keep the account as another user in the twitter world. It is needed because:
 
 * 150 requests per hour using the API are allowed.
 * You can follow 500 users per day, otherwise your account will be closed.
@@ -90,7 +94,9 @@ The _CheckForTwitterError method:
       
 As you can see, instead raising the error catched, it is only printed, so the application since its execution is never stopped. 
 
-You can return this to its original functionality commenting the print lines and uncommenting the raise lines. Also, yo need to remove the line where the data variable is set to a new hash '{}'. 
+You can return this to its original functionality commenting the print lines and uncommenting the raise lines. Also, you need to comment/remove the line:
+
+    data = {}
 
 Running
 ---------------------
@@ -99,6 +105,27 @@ Marketweet uses the multiprocessing module, which allow you have multiple proces
 * __tweets.txt__: A list of tweets, where each has at most 140 characters and is tweetead after a certain time, separated by a line break. 
 * __topics.txt__: The list of keywords the bot should rely to follow people. Topics can be as long as you want, separated by a line break. 
 * __users.txt__: The list of users the bot can ignore and keep following even they haven't returned the follow, separated by a line break.  
+
+As an example, check this out:
+
+tweets.txt
+
+    Hello World, I'm a tweet example
+    This is another example, and I'm a different tweet
+
+topics.txt
+
+    politics
+    Mexican Food
+    AnyKindOfStuff
+    
+users.txt    
+    
+    dhh
+    edolopez
+    anyrandom
+    
+----
 
 To run Marketweet, just type in terminal
 
