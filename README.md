@@ -57,7 +57,7 @@ These variables are used in all places where the time.sleep(CONSTANT) is used to
 
 * 150 requests per hour using the API are allowed.
 * You can follow 500 users per day, otherwise your account will be closed.
-* You cannot follow more than 2000 users, if the difference between followers and following is more than 2000 http://twittnotes.com/2009/03/2000-following-limit-on-twitter.html 
+* You cannot follow more than 2000 users, if the difference between followers and following is more than 2000. [Check this article](http://twittnotes.com/2009/03/2000-following-limit-on-twitter.html). 
 
 ### twitter.py (optional)
 
