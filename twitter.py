@@ -3675,7 +3675,7 @@ class Api(object):
         print TwitterError("Technical Error")
       #raise TwitterError("json decoding")
       print TwitterError("json decoding")
-      data = {}
+      data = {}     # As the program is never stopped, we need to return something at least
 
     return data
 
