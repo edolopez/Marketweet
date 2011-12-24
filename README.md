@@ -26,6 +26,8 @@ Setup
 ---------------------
 You need to modify some files to start using the Marketweet application.
 
+### account.py
+
 First of all, the account.py need to have all credentials and information about the account you are going to use and authenticate.
 
     USERNAME = "username"
@@ -38,6 +40,8 @@ First of all, the account.py need to have all credentials and information about 
                       debugHTTP=False)
                                         
 If you don't have the credentials for your account, you can easily set up them here https://dev.twitter.com/ signing in with your corresponding account.
+
+### ircBot.py
 
 Next, you can modify if you want the ircBot.py file. Everything can be modified, but if you like the logic of the processes about to execute, the main section you may want to modify is where all constants are initialized:
 
@@ -53,6 +57,8 @@ These variables are used in all places where the time.sleep(CONSTANT) is used to
 * 150 requests to the API per hour are allowed.
 * You can follow 500 users per day, otherwise your account will be closed.
 * You cannot follow more than 2000 users, if the difference between followers and following is more than 2000 http://twittnotes.com/2009/03/2000-following-limit-on-twitter.html 
+
+### twitter.py
 
 Finally, and according to the last points highlighted, the twitter.py module from the Python-Twitter Developers was modified in order to keep the processes running, no matter whether an error ocurred or a technical problem appeared during the requests throught the API. Here's the modified sections to accomplish this:
 
@@ -75,13 +81,13 @@ The  _ParseAndCheckTwitter method:
         print TwitterError("Technical Error")
       #raise TwitterError("json decoding")
       print TwitterError("json decoding")
-      data = {}
+      data = {}     # As the program is never stopped, we need to return something at least
 
     return data
     
 The _CheckForTwitterError method:
 
-  def _CheckForTwitterError(self, data):
+    def _CheckForTwitterError(self, data):
     """Raises a TwitterError if twitter returns an error message.
 
     Args:
@@ -97,9 +103,9 @@ The _CheckForTwitterError method:
       #raise TwitterError(data['error'])
       print TwitterError(data['error'])
       
-As you can see, instead raise the error catched, it is only printed, so the application since its execution is never stopped. 
+As you can see, instead raising the error catched, it is only printed, so the application since its execution is never stopped. 
 
-You can return this to its original functionality commenting the print lines and uncommenting the raise comments. 
+You can return this to its original functionality commenting the print lines and uncommenting the raise lines. Also, yo need to remove the line where the data variable is set to a new hash '{}'. 
 
 Running
 ---------------------
