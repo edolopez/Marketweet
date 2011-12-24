@@ -41,7 +41,7 @@ First of all, the account.py need to have all credentials and information about 
                                         
 If you don't have the credentials for your account, you can easily set up them here https://dev.twitter.com/ signing in with your corresponding account.
 
-### ircBot.py
+### ircBot.py (optional)
 
 Next, you can modify if you want the ircBot.py file. Everything can be modified, but if you like the logic of the processes about to execute, the main section you may want to modify is where all constants are initialized:
 
@@ -54,24 +54,18 @@ Next, you can modify if you want the ircBot.py file. Everything can be modified,
     
 These variables are used in all places where the time.sleep(CONSTANT) is used to sleep processes and keep the account as another user in the twitter world. It is needed because:
 
-* 150 requests to the API per hour are allowed.
+* 150 requests per hour using the API are allowed.
 * You can follow 500 users per day, otherwise your account will be closed.
 * You cannot follow more than 2000 users, if the difference between followers and following is more than 2000 http://twittnotes.com/2009/03/2000-following-limit-on-twitter.html 
 
-### twitter.py
+### twitter.py (optional)
 
 Finally, and according to the last points highlighted, the twitter.py module from the Python-Twitter Developers was modified in order to keep the processes running, no matter whether an error ocurred or a technical problem appeared during the requests throught the API. Here's the modified sections to accomplish this:
 
 The  _ParseAndCheckTwitter method:
 
     def _ParseAndCheckTwitter(self, json):
-    """Try and parse the JSON returned from Twitter and return
-    an empty dictionary if there is any error. This is a purely
-    defensive check because during some Twitter network outages
-    it will return an HTML failwhale page."""
-    try:
-      data = simplejson.loads(json)
-      self._CheckForTwitterError(data)
+    ...
     except ValueError:
       if "<title>Twitter / Over capacity</title>" in json:
         #raise TwitterError("Capacity Error")
@@ -83,22 +77,12 @@ The  _ParseAndCheckTwitter method:
       print TwitterError("json decoding")
       data = {}     # As the program is never stopped, we need to return something at least
 
-    return data
+      return data
     
 The _CheckForTwitterError method:
 
     def _CheckForTwitterError(self, data):
-    """Raises a TwitterError if twitter returns an error message.
-
-    Args:
-      data:
-        A python dict created from the Twitter json response
-
-    Raises:
-      TwitterError wrapping the twitter error message if one exists.
-    """
-    # Twitter errors are relatively unlikely, so it is faster
-    # to check first, rather than try and catch the exception
+    ...
     if 'error' in data:
       #raise TwitterError(data['error'])
       print TwitterError(data['error'])
@@ -121,3 +105,5 @@ To run Marketweet, just type in terminal
 
 License
 ---------------------
+MIT License. Copyright 2011, Eduardo López. 
+http://www.opensource.org/licenses/MIT
