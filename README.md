@@ -13,14 +13,15 @@ Dependencies
 ---------------------
 To start using Marketweet you need to install some dependencies: 
 
-Simplejson: http://cheeseshop.python.org/pypi/simplejson 
-Httplib2: http://code.google.com/p/httplib2/ 
-OAuth2: http://github.com/simplegeo/python-oauth2
+* [Simplejson:](http://cheeseshop.python.org/pypi/simplejson) Can be installed through terminal
+* [Httplib2:](http://code.google.com/p/httplib2/) Can be installed through terminal
+* [OAuth2:](http://github.com/simplegeo/python-oauth2) Can be added into the Marketweet project dragging and dropping the main folder oauth2.
 
-The OAuth2 module can be added into the Marketweet project dragging and dropping the main folder. 
+The project is relying on the Twitter Module developet by the Python-Twitter Developers group: http://code.google.com/p/python-twitter/
 
-Twitter Module: http://code.google.com/p/python-twitter/
-Documentation of the twitter module: http://static.unto.net/python-twitter/0.5/doc/twitter.html
+You can directly download the entire project, or use the essential files posted here with the actual Marketweet project. Some lines have been adapted to Marketweet's functionality, so I suggest you to use the twitter module posted here. In case you want the newest version of the Twitter Module, please adapt it as discussed in the **Setup** section **twitter.py** header. 
+
+For an explicit explanation of what the Twitter module does, you can see the documentation [here](http://static.unto.net/python-twitter/0.5/doc/twitter.html).
 
 Setup
 ---------------------
@@ -93,11 +94,11 @@ You can return this to its original functionality commenting the print lines and
 
 Running
 ---------------------
-Marketweet uses the multiprocessing module, which allow you have multiple processes running on the backend. In this case, the Tweeting and Following processes both are running all the time. These read certain files to update what they are doing, making easy the bot's administration, and allowing to keep running the bot without stoping it for minimum modifications. These files are:
+Marketweet uses the multiprocessing module, which allow you have multiple processes running on the backend. In this case, the Tweeting and Following processes both are running all the time. These read certain files to update what they are doing, making easy the bot's administration, and allowing to keep running the bot without stoping it for minimum modifications. The files that should be created are:
 
-* tweets.txt: A list of tweets, where each has at most 140 characters and is tweetead after a certain time.
-* topics.txt: The list of keywords the bot should rely to follow people. Topics can be as long as you want, separate by a line break. 
-* users.txt: The list of users the bot can ignore and keep following even they haven't returned the follow. 
+* __tweets.txt__: A list of tweets, where each has at most 140 characters and is tweetead after a certain time, separated by a line break. 
+* __topics.txt__: The list of keywords the bot should rely to follow people. Topics can be as long as you want, separated by a line break. 
+* __users.txt__: The list of users the bot can ignore and keep following even they haven't returned the follow, separated by a line break.  
 
 To run Marketweet, just type in terminal
 
@@ -105,5 +106,4 @@ To run Marketweet, just type in terminal
 
 License
 ---------------------
-MIT License. Copyright 2011, Eduardo López. 
-http://www.opensource.org/licenses/MIT
+MIT License. Copyright 2011, Eduardo López | https://github.com/edolopez/
