@@ -1,5 +1,5 @@
 '''
-Copyright (c) 2011, Eduardo López | https://github.com/edolopez/
+Copyright (c) 2011, Eduardo Lopez | https://github.com/edolopez/
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -10,9 +10,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 import twitter
 import account
-import string, time, random
 import multiprocessing
-#str(datetime.timedelta(seconds=(time.time() - t))).split('.')[0] => Seconds to human time
+import string, time, random, datetime
 
 '''Initialization of both twitter global access and bot's account.'''
 twitter = twitter.Api()
@@ -22,7 +21,7 @@ bot = account.initialize()
 MAXIMUM_PAGE = 100
 SLEEP_FOLLOWING = 60 * 60 * 1           # 60 seconds times 60 minutes times N hours of sleep
 SLEEP_UNFOLLOWING = 60 * 60 * 24 * 7    # Whole week of sleep
-SLEEP_NEW_TWEET = 60 * 60 * 1           # 60 seconds times 60 minutes times N hours of sleep
+SLEEP_NEW_TWEET = 60 * 60               # 60 seconds times 60 minutes times N hours of sleep
 ONE_DAY = 86400
 
 following = 0   # Users following per day. Shouldn't pass 500
@@ -49,7 +48,7 @@ def follow_people_by_topic():
       while acum < len(search):
         user = search[acum].user 
         if user.followers_count < 1000:     # Conditions as filter to follow new people
-          print "Started following: " + str(user.screen_name) # + " from " + user.time_zone
+          print "Started following: " + str(user.screen_name)
           bot.CreateFriendship(user.screen_name)
         time.sleep(24)     # Patch to keep requests under 150 per hour (3600/150)
         acum += 1
@@ -60,14 +59,13 @@ def follow_people_by_topic():
     if (following == 500 or following == 1000 or following == 1500):  # Users following per day. Shouldn't pass 500
       print 'Sleeping for 24 hours. Limit of following 500 per day has been reached' 
       print str(time.asctime(time.localtime()))
-      time.sleep(7200)     # Sleep one day. Limit has been reached
-    elif (following >= 100):
+      time.sleep(ONE_DAY)     # Sleep one day. Limit has been reached
+    elif (following >= 2000):
       print 'Waiting until people start to return the follow in order to unfollow' 
       print str(time.asctime(time.localtime()))
-      time.sleep(1000)               #SLEEP_UNFOLLOWING
+      time.sleep(SLEEP_UNFOLLOWING)
       unfollow_people()       # Need to unfollow people, in order to follow more. 
       following = 0
-    #time.sleep(SLEEP_FOLLOWING)
 
 '''Returns the last line from the file specified for topics to search'''
 def topic():
@@ -140,7 +138,7 @@ def tweet_from_file():
       print 'There are no tweets to tweet on the file'
     else:
       index = random.randint(0, len(tweets)-1)
-      bot.PostUpdates(tweets[index])
+      #bot.PostUpdates(tweets[index])
       print '-' * 10
       print 'TWEETING Process:\t Finished'
       print 'Tweet was:\t\t ' + tweets[index].split('\n')[0]
@@ -151,15 +149,16 @@ def tweet_from_file():
     f.writelines(tweets)
     f.close()
     
-    sleep_process = SLEEP_NEW_TWEET * random.randint(1, 5)
-    time.sleep(3600)     # Sleeps certain time until the next tweet
+    sleep_process = SLEEP_NEW_TWEET * random.randint(6, 18)
+    print 'Hours for next tweet: ' + str(datetime.timedelta(seconds=(sleep_process))).split(':')[0]
+    time.sleep(sleep_process)     # Sleeps certain time until the next tweet
 
 
 '''Bot flow'''
 # Should use threads for syncronizathion and independent tasks
 #follow_people_by_topic("tec")
-unfollow_people()
-#tweet_from_file()
+#unfollow_people()
+tweet_from_file()
 
 #tweet_from_file.start()
 #multiprocessing.Process(target=follow_people_by_topic, args=(['mexico', 'rayados'],)).start()
