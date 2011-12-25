@@ -138,7 +138,7 @@ def tweet_from_file():
       print 'There are no tweets to tweet on the file'
     else:
       index = random.randint(0, len(tweets)-1)
-      #bot.PostUpdates(tweets[index])
+      bot.PostUpdates(tweets[index])
       print '-' * 10
       print 'TWEETING Process:\t Finished'
       print 'Tweet was:\t\t ' + tweets[index].split('\n')[0]
@@ -156,13 +156,6 @@ def tweet_from_file():
 
 '''Bot flow'''
 # Should use threads for syncronizathion and independent tasks
-#follow_people_by_topic("tec")
-#unfollow_people()
-tweet_from_file()
-
-#tweet_from_file.start()
-#multiprocessing.Process(target=follow_people_by_topic, args=(['mexico', 'rayados'],)).start()
-#multiprocessing.Process(target=follow_people_by_topic).start()
-#multiprocessing.Process(target=unfollow_people).start()
-#multiprocessing.Process(target=tweet_from_file).start()
+multiprocessing.Process(target=follow_people_by_topic).start()
+multiprocessing.Process(target=tweet_from_file).start()
 
