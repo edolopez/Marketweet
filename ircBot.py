@@ -26,6 +26,7 @@ ONE_DAY = 86400
 
 following = 0   # Users following per day. Shouldn't pass 500
 followers_limit = 0
+following_limit = 0
 
 
 '''Returns the User Object with the screen name of the authenticated account.'''
@@ -85,13 +86,14 @@ def topic():
 '''Function to unfollow people who haven't returned the follow yet.'''
 def unfollow_people():
   print 'UNFOLLOWING Process:\t Started'
+  global followers_limit
   page, unfollowed = 0, 0
   following_limit = get_bot_user().GetFriendsCount()/MAXIMUM_PAGE   # Aproximatley 100 following users per page
   followers_limit = get_bot_user().GetFollowersCount()/MAXIMUM_PAGE
   master_users = users()        # List of all users should follow no matter what
 
   while page <= following_limit:
-    users_bot_follows = bot.GetFriends()        # To determine the number of iterations through folowers' pages
+    users_bot_follows = bot.GetFriends()        # To determine the number of iterations through following pages
     for user in users_bot_follows:
       if not following_bot(user) and str(user.screen_name) not in master_users:
         print "Unfollowing: " + str(user.screen_name)
@@ -126,6 +128,38 @@ def users():
   
   return users_list
   
+  
+'''Funtion that follows those users following the account, but not followed yet'''
+def follow_people_not_followed():
+  print 'FOLLOWING THE UNFOLLOWED Process: Started'
+  page, new_following = 0, 0
+  global following_limit
+  followers_limit = get_bot_user().GetFollowersCount()/MAXIMUM_PAGE
+  following_limit = get_bot_user().GetFriendsCount()/MAXIMUM_PAGE
+  
+  while page <= followers_limit:
+    bot_followers = bot.GetFollowers(page)  # To determine the number of iterations through followers' pages
+    for user in bot_followers:
+      if not bot_is_following(user):
+        print "Following: " + str(user.screen_name)
+        bot.CreateFriendship(user.screen_name)
+        new_following += 1
+      time.sleep(24)     # Patch to keep requests under 150 per hour
+    page += 1
+  print '-' * 10
+  print 'FOLLOWING THE UNFOLLOWED Process: Finished'
+  print 'People Following:\t\t  ' + str(new_following)
+  print '-' * 10
+
+'''Returns True if the current account is following the user as parameter, otherwise returns False '''
+def bot_is_following(user):
+  page = 0
+  while page <= following_limit:
+    for following_user in bot.GetFriends():
+      if following_user == user:
+        return True
+    page += 1
+  return False
 
 '''Function to tweet random phrases from an specific file.'''
 def tweet_from_file():
@@ -157,5 +191,6 @@ def tweet_from_file():
 '''Bot flow'''
 # Should use threads for syncronizathion and independent tasks
 multiprocessing.Process(target=follow_people_by_topic).start()
+#multiprocessing.Process(target=follow_people_not_followed).start()
 multiprocessing.Process(target=tweet_from_file).start()
 
