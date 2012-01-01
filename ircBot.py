@@ -41,6 +41,7 @@ def follow_people_by_topic():
     global following
     acum, pagination_index, accounts_per_page = 0, 1, 20
     topic_to_search = topic()
+    followed_users = users('followed.txt')
     print 'Searching topic: ' + topic_to_search
     while pagination_index <= 5:
       print 'Searching users in page ' + str(pagination_index) + '...'
@@ -48,15 +49,23 @@ def follow_people_by_topic():
                                  accounts_per_page, pagination_index, "es", "true", True)
       while acum < len(search):
         user = search[acum].user 
-        if user.followers_count < 1000:     # Conditions as filter to follow new people
+        # Conditions as filter to follow new people
+        if user.followers_count < 1000 and str(user.screen_name) not in followed_users:
           print "Started following: " + str(user.screen_name)
           bot.CreateFriendship(user.screen_name)
+          followed_users.append(str(user.screen_name))      # Add the new user followed to list
         time.sleep(24)     # Patch to keep requests under 150 per hour (3600/150)
         acum += 1
       following += acum
       acum = 0
       pagination_index += 1
     print 'Following ' + str(following) + ' new users'
+    users_list = []
+    f = open('followed.txt', 'w')     # Reopen file to write remaining tweets
+    for user in followed_users:       # Removes the '\n' from file for each user
+      users_list.append(user + '\n')  # Adds '\n' to each user to save them again on file
+    f.writelines(users_list)          # Write users followed with \n for each
+    f.close()
     if (following == 500 or following == 1000 or following == 1500):  # Users following per day. Shouldn't pass 500
       print 'Sleeping for 24 hours. Limit of following 500 per day has been reached' 
       print str(time.asctime(time.localtime()))
@@ -67,6 +76,7 @@ def follow_people_by_topic():
       time.sleep(SLEEP_UNFOLLOWING)
       unfollow_people()       # Need to unfollow people, in order to follow more. 
       following = 0
+    time.sleep(28800)       # Keep a rationale behavior while following (waits 8 hours)
 
 '''Returns the last line from the file specified for topics to search'''
 def topic():
@@ -90,7 +100,7 @@ def unfollow_people():
   page, unfollowed = 0, 0
   following_limit = get_bot_user().GetFriendsCount()/MAXIMUM_PAGE   # Aproximatley 100 following users per page
   followers_limit = get_bot_user().GetFollowersCount()/MAXIMUM_PAGE
-  master_users = users()        # List of all users should follow no matter what
+  master_users = users('users.txt')        # List of all users should follow no matter what
 
   while page <= following_limit:
     users_bot_follows = bot.GetFriends()        # To determine the number of iterations through following pages
@@ -117,9 +127,9 @@ def following_bot(user):
   return False
 
 '''Returns a list of users that should be followed even if the don't follow back'''
-def users():
+def users(_file):
   users_list = []
-  f = open('users.txt', 'r')       # Open files to make them an array
+  f = open(_file, 'r')       # Open files to make them an array
   master_users = f.readlines()
   f.close()
   
