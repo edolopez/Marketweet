@@ -39,10 +39,12 @@ def get_bot_user():
 def follow_people_by_topic():
   while True:
     global following
-    acum, pagination_index, accounts_per_page = 0, 1, 20
+    acum, friends, pagination_index, accounts_per_page, t = 0, 0, 1, 20, time.time()
     topic_to_search = topic()
     followed_users = users('followed.txt')
+    print '--' * 15
     print 'Searching topic: ' + topic_to_search
+    print '--' * 15
     while pagination_index <= 5:
       print 'Searching users in page ' + str(pagination_index) + '...'
       search = twitter.GetSearch(topic_to_search, None, None, 
@@ -54,29 +56,32 @@ def follow_people_by_topic():
           print "Started following: " + str(user.screen_name)
           bot.CreateFriendship(user.screen_name)
           followed_users.append(str(user.screen_name))      # Add the new user followed to list
+          friends += 1     # Real number of people being followed
         time.sleep(24)     # Patch to keep requests under 150 per hour (3600/150)
         acum += 1
       following += acum
       acum = 0
       pagination_index += 1
-    print 'Following ' + str(following) + ' new users'
+    print '--' * 15
+    print 'Following ' + str(friends) + ' new users. (' + str(following) + ' total requests)'
+    print 'Time taken: ' + str(datetime.timedelta(seconds=(time.time() - t))).split('.')[0]
+    print '--' * 15
     users_list = []
     f = open('followed.txt', 'w')     # Reopen file to write remaining tweets
     for user in followed_users:       # Removes the '\n' from file for each user
       users_list.append(user + '\n')  # Adds '\n' to each user to save them again on file
     f.writelines(users_list)          # Write users followed with \n for each
     f.close()
-    if (following == 500 or following == 1000 or following == 1500):  # Users following per day. Shouldn't pass 500
-      print 'Sleeping for 24 hours. Limit of following 500 per day has been reached' 
-      print str(time.asctime(time.localtime()))
-      time.sleep(ONE_DAY)     # Sleep one day. Limit has been reached
-    elif (following >= 2000):
+    if (following >= 2000):    # Reached the limit imposed by twitter
       print 'Waiting until people start to return the follow in order to unfollow' 
       print str(time.asctime(time.localtime()))
       time.sleep(SLEEP_UNFOLLOWING)
       unfollow_people()       # Need to unfollow people, in order to follow more. 
       following = 0
-    time.sleep(28800)       # Keep a rationale behavior while following (waits 8 hours)
+    else:
+      print 'Sleeping for 7 hours keeping a rationale behavior.' 
+      print str(time.asctime(time.localtime()))
+      time.sleep(25200)       # Keep a rationale behavior while following (waits 7 hours)
 
 '''Returns the last line from the file specified for topics to search'''
 def topic():
@@ -95,9 +100,10 @@ def topic():
 
 '''Function to unfollow people who haven't returned the follow yet.'''
 def unfollow_people():
+  print '--' * 15
   print 'UNFOLLOWING Process:\t Started'
   global followers_limit
-  page, unfollowed = 0, 0
+  page, unfollowed, t = 0, 0, time.time()
   following_limit = get_bot_user().GetFriendsCount()/MAXIMUM_PAGE   # Aproximatley 100 following users per page
   followers_limit = get_bot_user().GetFollowersCount()/MAXIMUM_PAGE
   master_users = users('users.txt')        # List of all users should follow no matter what
@@ -111,10 +117,11 @@ def unfollow_people():
         unfollowed += 1
       time.sleep(24)     # Patch to keep requests under 150 per hour
     page += 1
-  print '-' * 10
+  print '--' * 15
   print 'UNFOLLOWING Process:\t Finished'
   print 'People Unfollowed:\t ' + str(unfollowed)
-  print '-' * 10
+  print 'Time taken: ' + str(datetime.timedelta(seconds=(time.time() - t))).split('.')[0]
+  print '--' * 15
 
 '''Function returning true if the user received as parameter is following the bot. Otherwise return false.'''
 def following_bot(user):
@@ -142,7 +149,7 @@ def users(_file):
 '''Funtion that follows those users following the account, but not followed yet'''
 def follow_people_not_followed():
   print 'FOLLOWING THE UNFOLLOWED Process: Started'
-  page, new_following = 0, 0
+  page, new_following, t = 0, 0, time.time()
   global following_limit
   followers_limit = get_bot_user().GetFollowersCount()/MAXIMUM_PAGE
   following_limit = get_bot_user().GetFriendsCount()/MAXIMUM_PAGE
@@ -156,10 +163,11 @@ def follow_people_not_followed():
         new_following += 1
       time.sleep(24)     # Patch to keep requests under 150 per hour
     page += 1
-  print '-' * 10
+  print '--' * 15
   print 'FOLLOWING THE UNFOLLOWED Process: Finished'
   print 'People Following:\t\t  ' + str(new_following)
-  print '-' * 10
+  print 'Time taken: ' + str(datetime.timedelta(seconds=(time.time() - t))).split('.')[0]
+  print '--' * 15
 
 '''Returns True if the current account is following the user as parameter, otherwise returns False '''
 def bot_is_following(user):
@@ -179,14 +187,14 @@ def tweet_from_file():
     f.close()                       # Close file to avoid any further issue
 
     if (len(tweets) <= 0):          # In case no more lines in file
-      print 'There are no tweets to tweet on the file'
+      print '---> There are no tweets to tweet on the file <---'
     else:
       index = random.randint(0, len(tweets)-1)
       bot.PostUpdates(tweets[index])
-      print '-' * 10
+      print '--' * 15
       print 'TWEETING Process:\t Finished'
       print 'Tweet was:\t\t ' + tweets[index].split('\n')[0]
-      print '-' * 10
+      print '--' * 15
       del tweets[index]
 
     f = open('tweets.txt', 'w')     # Reopen file to write remaining tweets
