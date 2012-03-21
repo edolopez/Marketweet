@@ -11,7 +11,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import twitter
 import account
 import multiprocessing
-import string, time, random, datetime
+import string, time, random, datetime, codecs
 
 '''Initialization of both twitter global access and bot's account.'''
 twitter = twitter.Api()
@@ -42,6 +42,11 @@ def follow_people_by_topic():
     acum, friends, pagination_index, accounts_per_page, t = 0, 0, 1, 20, time.time()
     topic_to_search = topic()
     followed_users = users('followed.txt')
+    
+    f = codecs.open('replies.txt', "r", "utf-8")     # Open file saving replies in read mode
+    replies = f.readlines()          # Save all lines in a list as a possible reply
+    f.close()                       # Close file to avoid any further issue
+    
     print '--' * 15
     print 'Searching topic: ' + topic_to_search
     print '--' * 15
@@ -55,9 +60,14 @@ def follow_people_by_topic():
         if user.followers_count < 1000 and str(user.screen_name) not in followed_users:
           print "Started following: " + str(user.screen_name)
           bot.CreateFriendship(user.screen_name)
+          
+          # Reply to new friend
+          index = random.randint(0, len(replies)-1)
+          bot.PostUpdates('@' + user.screen_name + ' ' + replies[index])
+          
           followed_users.append(str(user.screen_name))      # Add the new user followed to list
           friends += 1     # Real number of people being followed
-        time.sleep(24)     # Patch to keep requests under 150 per hour (3600/150)
+        time.sleep(30)     # Patch to keep requests under 150 per hour (3600/150)
         acum += 1
       following += acum
       acum = 0
@@ -210,5 +220,5 @@ def tweet_from_file():
 # Should use threads for syncronizathion and independent tasks
 multiprocessing.Process(target=follow_people_by_topic).start()
 #multiprocessing.Process(target=follow_people_not_followed).start()
-multiprocessing.Process(target=tweet_from_file).start()
+#multiprocessing.Process(target=tweet_from_file).start()
 
